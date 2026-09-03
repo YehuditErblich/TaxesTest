@@ -1,0 +1,238 @@
+.page-frame {
+  width: min(100% - 2rem, 58rem);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 4rem) 0;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 3rem;
+  color: #746c62;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  color: #c35b35;
+  text-decoration: underline;
+}
+
+.page-header {
+  margin-bottom: 2.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: #c35b35;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 0.75rem;
+  color: #27241f;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+.lede {
+  max-width: 42rem;
+  margin: 0;
+  color: #766f66;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.form-panel {
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  border: 1px solid #ded8ce;
+  background: #fffdf9;
+  box-shadow: 0 1.25rem 3rem rgb(48 42 35 / 8%);
+}
+
+.form-panel__intro {
+  margin-bottom: 2rem;
+  color: #827a70;
+  font-size: 0.85rem;
+}
+
+.field-group {
+  margin-bottom: 1.5rem;
+}
+
+.field-group > label,
+fieldset legend {
+  display: block;
+  margin-bottom: 0.55rem;
+  color: #39342d;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+b {
+  color: #c35b35;
+}
+
+input:not([type='checkbox']),
+textarea,
+select {
+  width: 100%;
+  border: 1px solid #cfc7bb;
+  border-radius: 0.15rem;
+  padding: 0.8rem 0.85rem;
+  background: #fff;
+  color: #29251f;
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:not([type='checkbox']):focus,
+textarea:focus,
+select:focus {
+  outline: 3px solid rgb(195 91 53 / 22%);
+  outline-offset: 1px;
+  border-color: #c35b35;
+}
+
+fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+
+.option-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #514a42;
+  cursor: pointer;
+}
+
+.check-field input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: #c35b35;
+}
+
+.field-group--invalid input:not([type='checkbox']),
+.field-group--invalid textarea,
+.field-group--invalid select {
+  border-color: #bc5338;
+}
+
+.field-error,
+.form-error {
+  display: block;
+  margin-top: 0.45rem;
+  color: #ae3e28;
+  font-size: 0.82rem;
+}
+
+.form-error {
+  padding: 0.8rem;
+  border-left: 3px solid #bc5338;
+  background: #fff4ef;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 0.2rem;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button--dark {
+  background: #27241f;
+  color: #fffdf9;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.submit-button {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.state-panel {
+  display: grid;
+  min-height: 16rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.6rem;
+  padding: 2rem;
+  border: 1px dashed #cfc7bb;
+  background: rgb(255 253 249 / 70%);
+  color: #6f685f;
+  text-align: center;
+}
+
+.state-panel strong {
+  color: #312d27;
+  font-size: 1.1rem;
+}
+
+.state-panel p {
+  margin: 0;
+}
+
+.state-panel--error {
+  border-color: #d99377;
+  background: #fff8f4;
+}
+
+.state-panel--success {
+  border-color: #9eb7a3;
+  background: #f6fbf5;
+}
+
+.state-panel__detail {
+  font-size: 0.85rem;
+}
+
+.state-panel__mark {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 1px solid #5c8a64;
+  border-radius: 50%;
+  color: #477550;
+  font-size: 1.25rem;
+}
+
+.loader {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #eadbd2;
+  border-top-color: #c35b35;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

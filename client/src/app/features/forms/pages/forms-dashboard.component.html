@@ -1,0 +1,45 @@
+<main class="dashboard page-frame" dir="rtl">
+  <nav class="top-nav" aria-label="ניווט ראשי"><strong>Forms / טפסים</strong><a routerLink="/admin">ניהול מערכת</a></nav>
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">סביבת עבודה</p>
+      <h1>ספריית טפסים</h1>
+      <p class="lede">בחרו טופס שפורסם כדי להתחיל שליחה חדשה.</p>
+    </div>
+    <button class="button button--quiet" type="button" (click)="reload()" [disabled]="isLoading()">
+      רענון הספרייה
+    </button>
+  </header>
+
+  @if (isLoading()) {
+    <section class="state-panel" aria-live="polite">
+      <span class="loader" aria-hidden="true"></span>
+      <p>הטפסים נטענים</p>
+    </section>
+  } @else if (errorMessage(); as message) {
+    <section class="state-panel state-panel--error" role="alert">
+      <strong>אירעה תקלה</strong>
+      <p>{{ message }}</p>
+      <button class="button button--dark" type="button" (click)="reload()">נסו שוב</button>
+    </section>
+  } @else if (templates().length === 0) {
+    <section class="state-panel">
+      <span class="state-panel__mark" aria-hidden="true">+</span>
+      <strong>אין עדיין טפסים שפורסמו</strong>
+      <p>טפסים שפורסמו יופיעו כאן כשהם יהיו מוכנים לשימוש.</p>
+    </section>
+  } @else {
+    <section class="template-grid" aria-label="Published form templates">
+      @for (template of templates(); track template.id) {
+        <a class="template-card" [routerLink]="['/forms', template.id]">
+          <span class="template-card__index">{{ $index + 1 | number:'2.0-0' }}</span>
+          <div>
+            <h2>{{ template.name }}</h2>
+            <p>Created {{ template.createdAt | date:'MMM d, y' }}</p>
+          </div>
+          <span class="template-card__arrow" aria-hidden="true">↗</span>
+        </a>
+      }
+    </section>
+  }
+</main>

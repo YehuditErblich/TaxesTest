@@ -1,0 +1,107 @@
+<main class="submission page-frame" dir="rtl">
+  <a class="back-link" routerLink="/forms">חזרה לספריית הטפסים ←</a>
+
+  @if (isLoading()) {
+    <section class="state-panel" aria-live="polite">
+      <span class="loader" aria-hidden="true"></span>
+      <p>מכינים את הטופס</p>
+    </section>
+  } @else if (errorMessage(); as message) {
+    <section class="state-panel state-panel--error" role="alert">
+      <strong>לא ניתן להכין את הטופס</strong>
+      <p>{{ message }}</p>
+      <a class="button button--dark" routerLink="/forms">חזרה לספרייה</a>
+    </section>
+  } @else if (success(); as response) {
+    <section class="state-panel state-panel--success" role="status">
+      <span class="state-panel__mark" aria-hidden="true">✓</span>
+      <strong>השליחה התקבלה</strong>
+      <p>הטופס נשלח בהצלחה.</p>
+      @if (response.workflowInstanceId; as workflowId) {
+        <p class="state-panel__detail">תהליך אישור מספר {{ workflowId }} התחיל.</p>
+      }
+      <a class="button button--dark" routerLink="/forms">חזרה לספרייה</a>
+    </section>
+  } @else if (template(); as currentTemplate) {
+    <header class="page-header">
+      <p class="eyebrow">שליחה חדשה</p>
+      <h1>{{ currentTemplate.name }}</h1>
+      @if (currentTemplate.description) {
+        <p class="lede">{{ currentTemplate.description }}</p>
+      }
+    </header>
+
+    <form class="form-panel" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="form-panel__intro">
+        <span>שדות חובה מסומנים בכוכבית.</span>
+      </div>
+
+      @for (field of currentTemplate.fields; track field.id) {
+        <div class="field-group" [class.field-group--invalid]="hasError(field)">
+          @if (field.fieldType === 'Checkbox') {
+            <label class="check-field">
+              <input [formControlName]="field.name" type="checkbox" />
+              <span>{{ field.label }}@if (field.isRequired) { <b aria-hidden="true">*</b> }</span>
+            </label>
+          } @else if (field.fieldType === 'TextArea') {
+            <label [for]="field.name">{{ field.label }}@if (field.isRequired) { <b aria-hidden="true">*</b> }</label>
+            <textarea [id]="field.name" [formControlName]="field.name" rows="4"></textarea>
+          } @else if (field.fieldType === 'Select') {
+            <label [for]="field.name">{{ field.label }}@if (field.isRequired) { <b aria-hidden="true">*</b> }</label>
+            <select [id]="field.name" [formControlName]="field.name">
+              <option value="">בחרו אפשרות</option>
+              @for (option of field.options; track option.id) {
+                <option [value]="option.id">{{ option.label }}</option>
+              }
+            </select>
+          } @else if (field.fieldType === 'Radio') {
+            <fieldset>
+              <legend>{{ field.label }}@if (field.isRequired) { <b aria-hidden="true">*</b> }</legend>
+              <div class="option-list">
+                @for (option of field.options; track option.id) {
+                  <label class="check-field">
+                    <input type="radio" [formControlName]="field.name" [value]="option.id" />
+                    <span>{{ option.label }}</span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+          } @else if (field.fieldType === 'MultiSelect') {
+            <fieldset>
+              <legend>{{ field.label }}@if (field.isRequired) { <b aria-hidden="true">*</b> }</legend>
+              <div class="option-list">
+                @for (option of field.options; track option.id) {
+                  <label class="check-field">
+                    <input
+                      type="checkbox"
+                      [checked]="selectedOptionIds(field).includes(option.id)"
+                      (change)="toggleOption(field, option.id, isChecked($event))" />
+                    <span>{{ option.label }}</span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+          } @else {
+            <label [for]="field.name">{{ field.label }}@if (field.isRequired) { <b aria-hidden="true">*</b> }</label>
+            <input
+              [id]="field.name"
+              [formControlName]="field.name"
+              [type]="field.fieldType === 'Number' ? 'number' : field.fieldType === 'Date' ? 'date' : field.fieldType === 'File' ? 'file' : 'text'" />
+          }
+
+          @if (hasError(field)) {
+            <small class="field-error" role="alert">זהו שדה חובה.</small>
+          }
+        </div>
+      }
+
+      @if (errorMessage(); as submissionError) {
+        <p class="form-error" role="alert">{{ submissionError }}</p>
+      }
+
+      <button class="button button--dark submit-button" type="submit" [disabled]="isSubmitting()">
+        @if (isSubmitting()) { שולחים... } @else { שליחת הטופס }
+      </button>
+    </form>
+  }
+</main>

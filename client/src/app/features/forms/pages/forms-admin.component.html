@@ -1,0 +1,101 @@
+<main class="admin page-frame" dir="rtl">
+  <header class="admin-header">
+    <div>
+      <p class="eyebrow">ניהול מערכת</p>
+      <h1>מרכז הבקרה</h1>
+      <p class="lede">בנו טפסים ותהליכי אישור בהתאם לצורך העסקי.</p>
+    </div>
+    <a class="button button--outline" routerLink="/forms">לספריית הטפסים</a>
+  </header>
+
+  <nav class="tabs" aria-label="ניווט ניהול">
+    <button type="button" [class.tabs__item--active]="activeTab() === 'forms'" (click)="selectTab('forms')">בונה טפסים</button>
+    <button type="button" [class.tabs__item--active]="activeTab() === 'workflows'" (click)="selectTab('workflows')">בונה תהליכים</button>
+    <button type="button" [class.tabs__item--active]="activeTab() === 'statuses'" (click)="selectTab('statuses')">ניהול סטטוסים</button>
+  </nav>
+
+  @if (message(); as info) { <p class="notice notice--success" role="status">{{ info }}</p> }
+  @if (error(); as problem) { <p class="notice notice--error" role="alert">{{ problem }}</p> }
+
+  @if (isLoading()) {
+    <section class="state-panel"><span class="loader" aria-hidden="true"></span><p>טוען נתונים</p></section>
+  } @else {
+    @if (activeTab() === 'forms') {
+      <section class="builder-layout">
+        <form class="builder-panel" [formGroup]="formForm" (ngSubmit)="createForm()">
+          <div class="panel-heading"><span class="panel-number">01</span><div><h2>בניית טופס חדש</h2><p>הגדירו שדות, סוגים וכללי תצוגה.</p></div></div>
+          <div class="form-grid">
+            <div><label for="form-name">שם הטופס</label><input id="form-name" formControlName="name" placeholder="לדוגמה: בקשת הוצאה" /></div>
+            <div><label for="form-description">תיאור</label><input id="form-description" formControlName="description" placeholder="מטרת הטופס" /></div>
+          </div>
+          <div class="section-title"><h3>שדות הטופס</h3><button class="text-button" type="button" (click)="addField()">+ הוספת שדה</button></div>
+          <div formArrayName="fields" class="builder-items">
+            @for (field of fields.controls; track field; let fieldIndex = $index) {
+              <section class="builder-item" [formGroupName]="fieldIndex">
+                <div class="item-topline"><strong>שדה {{ fieldIndex + 1 }}</strong><div class="row-actions"><button type="button" class="icon-button" title="הזזה למעלה" (click)="moveField(fieldIndex, -1)">↑</button><button type="button" class="icon-button" title="הזזה למטה" (click)="moveField(fieldIndex, 1)">↓</button><button type="button" class="delete-button" (click)="removeField(fieldIndex)">מחיקה</button></div></div>
+                <div class="form-grid form-grid--three">
+                  <div><label [for]="'field-type-' + fieldIndex">סוג שדה</label><select [id]="'field-type-' + fieldIndex" formControlName="fieldType"><option ngValue="Text">טקסט</option><option ngValue="TextArea">טקסט ארוך</option><option ngValue="Number">מספר</option><option ngValue="Date">תאריך</option><option ngValue="Checkbox">תיבת סימון</option><option ngValue="Radio">כפתורי בחירה</option><option ngValue="Select">בחירה</option><option ngValue="MultiSelect">בחירה מרובה</option><option ngValue="File">קובץ</option></select></div>
+                  <div><label [for]="'field-name-' + fieldIndex">מפתח פנימי</label><input [id]="'field-name-' + fieldIndex" formControlName="name" placeholder="expenseAmount" /></div>
+                  <div><label [for]="'field-label-' + fieldIndex">כותרת להצגה</label><input [id]="'field-label-' + fieldIndex" formControlName="label" placeholder="סכום ההוצאה" /></div>
+                </div>
+                <div class="field-options"><label class="check-field"><input type="checkbox" formControlName="isRequired" /> שדה חובה</label><label class="check-field"><input type="checkbox" formControlName="isReadOnly" /> לקריאה בלבד</label></div>
+                @if (field.controls.fieldType.value === 'Radio' || field.controls.fieldType.value === 'Select' || field.controls.fieldType.value === 'MultiSelect') {
+                  <div class="options-editor"><div class="section-title"><h4>אפשרויות בחירה</h4><button type="button" class="text-button" (click)="addOption(fieldIndex)">+ אפשרות</button></div><div formArrayName="options">@for (option of options(fieldIndex).controls; track option; let optionIndex = $index) { <div class="option-row" [formGroupName]="optionIndex"><input formControlName="value" placeholder="ערך" [attr.aria-label]="'ערך אפשרות ' + (optionIndex + 1)" /><input formControlName="label" placeholder="תווית" [attr.aria-label]="'תווית אפשרות ' + (optionIndex + 1)" /><button type="button" class="delete-button" (click)="removeOption(fieldIndex, optionIndex)">×</button></div>}</div></div>
+                }
+              </section>
+            }
+          </div>
+          <section class="approval-builder" [formGroup]="workflowForm" aria-labelledby="form-workflow-title">
+            <div class="panel-heading">
+              <span class="panel-number">02</span>
+              <div>
+                <h2 id="form-workflow-title">מסלול אישורים לטופס</h2>
+                <p>המסלול יישמר יחד עם הטופס באותה פעולה.</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div><label for="form-workflow-name">שם המסלול</label><input id="form-workflow-name" formControlName="name" placeholder="לדוגמה: אישור בקשת הוצאה" /></div>
+              <div><label for="form-workflow-description">תיאור</label><input id="form-workflow-description" formControlName="description" placeholder="מטרת מסלול האישורים" /></div>
+            </div>
+            <div class="section-title"><h3>שלבי האישור</h3><button class="text-button" type="button" (click)="addWorkflowStep()">+ הוספת שלב</button></div>
+            <div formArrayName="steps" class="builder-items">
+              @for (step of steps.controls; track step; let stepIndex = $index) {
+                <section class="builder-item" [formGroupName]="stepIndex">
+                  <div class="item-topline"><strong>שלב {{ stepIndex + 1 }}</strong><div class="row-actions"><button type="button" class="icon-button" title="הזזה למעלה" (click)="moveWorkflowStep(stepIndex, -1)">↑</button><button type="button" class="icon-button" title="הזזה למטה" (click)="moveWorkflowStep(stepIndex, 1)">↓</button><button type="button" class="delete-button" (click)="removeWorkflowStep(stepIndex)">מחיקה</button></div></div>
+                  <div class="form-grid form-grid--three">
+                    <div><label [for]="'form-step-name-' + stepIndex">שם השלב</label><input [id]="'form-step-name-' + stepIndex" formControlName="name" placeholder="בדיקת מנהל" /></div>
+                    <div><label [for]="'form-approver-type-' + stepIndex">סוג מאשר</label><select [id]="'form-approver-type-' + stepIndex" formControlName="approverType"><option value="User">משתמש</option><option value="Role">תפקיד</option></select></div>
+                    <div><label [for]="'form-approver-' + stepIndex">{{ step.controls.approverType.value === 'Role' ? 'תפקיד מאשר' : 'מזהה משתמש' }}</label>@if (step.controls.approverType.value === 'Role') { <select [id]="'form-approver-' + stepIndex" formControlName="approver"><option value="">בחרו תפקיד</option>@for (role of testRoles; track role.id) { <option [value]="role.id">{{ role.name }}</option> }</select> } @else { <input [id]="'form-approver-' + stepIndex" formControlName="approver" placeholder="manager-1" /> }</div>
+                  </div>
+                  <div class="field-options"><label class="check-field"><input type="checkbox" formControlName="isRequired" /> שלב חובה</label><span class="actions-label">פעולות מותרות:</span><label class="check-field"><input type="checkbox" formControlName="approve" /> אישור</label><label class="check-field"><input type="checkbox" formControlName="reject" /> דחייה</label><label class="check-field"><input type="checkbox" formControlName="returnForCorrection" /> החזרה לתיקון</label></div>
+                </section>
+              }
+            </div>
+          </section>
+          <button class="button button--dark full-button" type="submit" [disabled]="isSaving()">{{ isSaving() ? 'שומר...' : 'שמירת הטופס ומסלול האישורים' }}</button>
+        </form>
+
+        <section class="management-panel"><div class="panel-heading"><span class="panel-number">02</span><div><h2>טפסים קיימים</h2><p>{{ forms().length }} טפסים במערכת</p></div></div>@if (forms().length === 0) { <p class="empty-copy">עדיין לא נוצרו טפסים.</p> } @for (form of forms(); track form.id) { <article class="list-row"><div><strong>{{ form.name }}</strong><small>{{ form.status }} · {{ form.createdAt | date:'dd/MM/yyyy' }}</small></div><div class="row-actions">@if (form.status === 'טיוטה') { <button type="button" class="text-button" (click)="publishForm(form.id)">פרסום</button> }<a class="text-button" [routerLink]="['/forms', form.id]">פתיחה</a></div></article>}</section>
+      </section>
+    }
+
+    @if (activeTab() === 'workflows') {
+      <section class="builder-layout">
+        <form class="builder-panel" [formGroup]="workflowForm" (ngSubmit)="createWorkflow()">
+          <div class="panel-heading"><span class="panel-number">01</span><div><h2>בניית תהליך חדש</h2><p>הוסיפו שלבים וסדרו את האישור.</p></div></div>
+          <div class="form-grid"><div><label for="workflow-name">שם התהליך</label><input id="workflow-name" formControlName="name" placeholder="לדוגמה: אישור הוצאה" /></div><div><label for="workflow-description">תיאור</label><input id="workflow-description" formControlName="description" placeholder="מתי התהליך מופעל?" /></div></div>
+          <div class="section-title"><h3>שלבי התהליך</h3><button class="text-button" type="button" (click)="addWorkflowStep()">+ הוספת שלב</button></div>
+          <div formArrayName="steps" class="builder-items">
+            @for (step of steps.controls; track step; let stepIndex = $index) {
+              <section class="builder-item" [formGroupName]="stepIndex"><div class="item-topline"><strong>שלב {{ stepIndex + 1 }}</strong><div class="row-actions"><button type="button" class="icon-button" title="הזזה למעלה" (click)="moveWorkflowStep(stepIndex, -1)">↑</button><button type="button" class="icon-button" title="הזזה למטה" (click)="moveWorkflowStep(stepIndex, 1)">↓</button><button type="button" class="delete-button" (click)="removeWorkflowStep(stepIndex)">מחיקה</button></div></div><div class="form-grid form-grid--three"><div><label [for]="'step-name-' + stepIndex">שם השלב</label><input [id]="'step-name-' + stepIndex" formControlName="name" placeholder="בדיקת מנהל" /></div><div><label [for]="'approver-type-' + stepIndex">סוג מאשר</label><select [id]="'approver-type-' + stepIndex" formControlName="approverType"><option value="User">משתמש</option><option value="Role">תפקיד</option></select></div><div><label [for]="'approver-' + stepIndex">{{ step.controls.approverType.value === 'Role' ? 'תפקיד מאשר' : 'מזהה משתמש' }}</label>@if (step.controls.approverType.value === 'Role') { <select [id]="'approver-' + stepIndex" formControlName="approver"><option value="">בחרו תפקיד</option>@for (role of testRoles; track role.id) { <option [value]="role.id">{{ role.name }}</option> }</select> } @else { <input [id]="'approver-' + stepIndex" formControlName="approver" placeholder="manager-1" /> }</div></div><div class="field-options"><label class="check-field"><input type="checkbox" formControlName="isRequired" /> שלב חובה</label><span class="actions-label">פעולות מותרות:</span><label class="check-field"><input type="checkbox" formControlName="approve" /> אישור</label><label class="check-field"><input type="checkbox" formControlName="reject" /> דחייה</label><label class="check-field"><input type="checkbox" formControlName="returnForCorrection" /> החזרה לתיקון</label></div></section>
+            }
+          </div>
+          <button class="button button--dark full-button" type="submit" [disabled]="isSaving()">{{ isSaving() ? 'שומר...' : 'שמירת התהליך כטיוטה' }}</button>
+        </form>
+        <section class="management-panel"><div class="panel-heading"><span class="panel-number">02</span><div><h2>תהליכים קיימים</h2><p>{{ workflows().length }} תהליכים במערכת</p></div></div>@if (workflows().length === 0) { <p class="empty-copy">עדיין לא נוצרו תהליכים.</p> } @for (workflow of workflows(); track workflow.id) { <article class="list-row"><div><strong>{{ workflow.name }}</strong><small>{{ workflow.status }} · {{ workflow.createdAt | date:'dd/MM/yyyy' }}</small></div>@if (workflow.status === 'טיוטה') { <button type="button" class="text-button" (click)="publishWorkflow(workflow.id)">פרסום</button> }</article>}</section>
+      </section>
+    }
+
+    @if (activeTab() === 'statuses') { <section class="management-panel status-panel"><div class="panel-heading"><span class="panel-number">01</span><div><h2>מילון סטטוסים</h2><p>הטקסטים המוצגים במערכת ניתנים לעריכה.</p></div></div>@for (status of statuses(); track status.id) { <div class="status-row"><div><strong>{{ status.valueCode }}</strong><small>{{ status.statusTypeCode }}</small></div><input #statusText [value]="status.displayText" [attr.aria-label]="'טקסט עבור ' + status.valueCode" /><button type="button" class="text-button" (click)="updateStatus(status, statusText.value)">שמירה</button></div>}</section> }
+  }
+</main>
