@@ -8,3 +8,6 @@ client/.angular/
 *.user
 *.suo
 *.log
+
+# Local exam recordings and supporting documents (includes files over GitHub's 100 MB limit)
+/הקלטות של התשובות/
